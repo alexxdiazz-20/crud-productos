@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>CRUD Productos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    .container { max-width: 900px; margin: auto; }
+    form { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    form h2 { margin-bottom: 15px; color: #444; }
+    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
+    .btn-add { background: #4CAF50; }
+    .btn-update { background: #2196F3; }
+    .btn-clear { background: #9E9E9E; margin-left: 8px; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    th { background: #333; color: white; padding: 12px; }
+    td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
+    tr:hover { background: #f9f9f9; }
+    .btn-edit { background: #FF9800; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
+    .btn-delete { background: #f44336; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; margin-left: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Gestión de Productos</h1>
+
+    <form id="productForm">
+      <h2 id="formTitle">Agregar Producto</h2>
+      <input type="hidden" id="productId">
+      <input type="text" id="nombre" placeholder="Nombre del producto" required>
+      <input type="number" id="precio" placeholder="Precio" step="0.01" required>
+      <input type="text" id="categoria" placeholder="Categoría" required>
+      <button type="submit" class="btn-add" id="submitBtn">Agregar</button>
+      <button type="button" class="btn-clear" onclick="clearForm()">Limpiar</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Categoría</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="productosTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const API = 'http://localhost:3000/api/productos';
+
+    async function cargarProductos() {
+      const res = await fetch(API);
+      const productos = await res.json();
+      const tbody = document.getElementById('productosTable');
+      tbody.innerHTML = '';
+      productos.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.id}</td>
+            <td>${p.nombre}</td>
+            <td>$${parseFloat(p.precio).toFixed(2)}</td>
+            <td>${p.categoria}</td>
+            <td>
+              <button class="btn-edit" onclick="editarProducto(${p.id}, '${p.nombre}', ${p.precio}, '${p.categoria}')">Editar</button>
+              <button class="btn-delete" onclick="eliminarProducto(${p.id})">Eliminar</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('productId').value;
+      const body = {
+        nombre: document.getElementById('nombre').value,
+        precio: parseFloat(document.getElementById('precio').value),
+        categoria: document.getElementById('categoria').value
+      };
+
+      if (id) {
+        await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      } else {
+        await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      }
+      clearForm();
+      cargarProductos();
+    });
+
+    function editarProducto(id, nombre, precio, categoria) {
+      document.getElementById('productId').value = id;
+      document.getElementById('nombre').value = nombre;
+      document.getElementById('precio').value = precio;
+      document.getElementById('categoria').value = categoria;
+      document.getElementById('formTitle').textContent = 'Editar Producto';
+      document.getElementById('submitBtn').textContent = 'Actualizar';
+      document.getElementById('submitBtn').className = 'btn-update';
+    }
+
+    async function eliminarProducto(id) {
+      if (confirm('¿Estás seguro de eliminar este producto?')) {
+        await fetch(`${API}/${id}`, { method: 'DELETE' });
+        cargarProductos();
+      }
+    }
+
+    function clearForm() {
+      document.getElementById('productForm').reset();
+      document.getElementById('productId').value = '';
+      document.getElementById('formTitle').textContent = 'Agregar Producto';
+      document.getElementById('submitBtn').textContent = 'Agregar';
+      document.getElementById('submitBtn').className = 'btn-add';
+    }
+
+    cargarProductos();
+  </script>
+</body>
+</html>
