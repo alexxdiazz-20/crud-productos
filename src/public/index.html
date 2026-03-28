@@ -10,7 +10,13 @@
     .container { max-width: 900px; margin: auto; }
     form { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
     form h2 { margin-bottom: 15px; color: #444; }
-    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    input { width: 100%; padding: 10px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 5px; }
+    input.error { border-color: #f44336; }
+    .error-msg { color: #f44336; font-size: 12px; margin-bottom: 8px; display: none; }
+    .error-msg.visible { display: block; }
+    .toast { position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 12px 20px; border-radius: 6px; display: none; z-index: 999; font-size: 14px; }
+    .toast.error { background: #f44336; }
+    .toast.visible { display: block; }
     button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
     .btn-add { background: #4CAF50; }
     .btn-update { background: #2196F3; }
@@ -21,18 +27,27 @@
     tr:hover { background: #f9f9f9; }
     .btn-edit { background: #FF9800; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
     .btn-delete { background: #f44336; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; margin-left: 5px; }
+    .empty-msg { text-align: center; padding: 20px; color: #999; font-style: italic; }
   </style>
 </head>
 <body>
+  <div class="toast" id="toast"></div>
   <div class="container">
     <h1>Gestión de Productos</h1>
 
     <form id="productForm">
       <h2 id="formTitle">Agregar Producto</h2>
       <input type="hidden" id="productId">
-      <input type="text" id="nombre" placeholder="Nombre del producto" required>
-      <input type="number" id="precio" placeholder="Precio" step="0.01" required>
-      <input type="text" id="categoria" placeholder="Categoría" required>
+
+      <input type="text" id="nombre" placeholder="Nombre del producto">
+      <div class="error-msg" id="nombreError">El nombre es requerido</div>
+
+      <input type="number" id="precio" placeholder="Precio" step="0.01">
+      <div class="error-msg" id="precioError">Ingresa un precio válido mayor a 0</div>
+
+      <input type="text" id="categoria" placeholder="Categoría">
+      <div class="error-msg" id="categoriaError">La categoría es requerida</div>
+
       <button type="submit" class="btn-add" id="submitBtn">Agregar</button>
       <button type="button" class="btn-clear" onclick="clearForm()">Limpiar</button>
     </form>
@@ -44,6 +59,7 @@
           <th>Nombre</th>
           <th>Precio</th>
           <th>Categoría</th>
+          <th>Stock</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -54,11 +70,57 @@
   <script>
     const API = 'http://localhost:3000/api/productos';
 
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast visible' + (isError ? ' error' : '');
+      setTimeout(() => toast.className = 'toast', 3000);
+    }
+
+    function validarFormulario() {
+      let valido = true;
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const precio = parseFloat(document.getElementById('precio').value);
+      const categoria = document.getElementById('categoria').value.trim();
+
+      document.getElementById('nombre').classList.remove('error');
+      document.getElementById('precio').classList.remove('error');
+      document.getElementById('categoria').classList.remove('error');
+      document.getElementById('nombreError').classList.remove('visible');
+      document.getElementById('precioError').classList.remove('visible');
+      document.getElementById('categoriaError').classList.remove('visible');
+
+      if (!nombre) {
+        document.getElementById('nombre').classList.add('error');
+        document.getElementById('nombreError').classList.add('visible');
+        valido = false;
+      }
+      if (!precio || precio <= 0) {
+        document.getElementById('precio').classList.add('error');
+        document.getElementById('precioError').classList.add('visible');
+        valido = false;
+      }
+      if (!categoria) {
+        document.getElementById('categoria').classList.add('error');
+        document.getElementById('categoriaError').classList.add('visible');
+        valido = false;
+      }
+
+      return valido;
+    }
+
     async function cargarProductos() {
       const res = await fetch(API);
       const productos = await res.json();
       const tbody = document.getElementById('productosTable');
       tbody.innerHTML = '';
+
+      if (productos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No hay productos registrados</td></tr>';
+        return;
+      }
+
       productos.forEach(p => {
         tbody.innerHTML += `
           <tr>
@@ -66,6 +128,7 @@
             <td>${p.nombre}</td>
             <td>$${parseFloat(p.precio).toFixed(2)}</td>
             <td>${p.categoria}</td>
+            <td>${p.stock ?? 0}</td>
             <td>
               <button class="btn-edit" onclick="editarProducto(${p.id}, '${p.nombre}', ${p.precio}, '${p.categoria}')">Editar</button>
               <button class="btn-delete" onclick="eliminarProducto(${p.id})">Eliminar</button>
@@ -76,17 +139,21 @@
 
     document.getElementById('productForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!validarFormulario()) return;
+
       const id = document.getElementById('productId').value;
       const body = {
-        nombre: document.getElementById('nombre').value,
+        nombre: document.getElementById('nombre').value.trim(),
         precio: parseFloat(document.getElementById('precio').value),
-        categoria: document.getElementById('categoria').value
+        categoria: document.getElementById('categoria').value.trim()
       };
 
       if (id) {
         await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        showToast('Producto actualizado correctamente ✏️');
       } else {
         await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        showToast('Producto agregado correctamente ✅');
       }
       clearForm();
       cargarProductos();
@@ -105,6 +172,7 @@
     async function eliminarProducto(id) {
       if (confirm('¿Estás seguro de eliminar este producto?')) {
         await fetch(`${API}/${id}`, { method: 'DELETE' });
+        showToast('Producto eliminado 🗑️', true);
         cargarProductos();
       }
     }
