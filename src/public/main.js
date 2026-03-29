@@ -3,7 +3,6 @@ let todosLosProductos = [];
 let productoAEliminar = null;
 let ordenActual = { columna: null, asc: true };
 
-// Toast
 function showToast(msg, isError = false) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
@@ -11,50 +10,58 @@ function showToast(msg, isError = false) {
   setTimeout(() => toast.className = 'toast', 3000);
 }
 
-// Validacion
 function validarFormulario() {
   let valido = true;
   const nombre = document.getElementById('nombre').value.trim();
   const precio = parseFloat(document.getElementById('precio').value);
   const categoria = document.getElementById('categoria').value.trim();
+  const stock = parseInt(document.getElementById('stock').value);
 
-  ['nombre', 'precio', 'categoria'].forEach(id => {
+  ['nombre', 'precio', 'categoria', 'stock'].forEach(id => {
     document.getElementById(id).classList.remove('error');
     document.getElementById(id + 'Error').classList.remove('visible');
   });
 
-if (!nombre || nombre.length < 2) {
-  document.getElementById('nombre').classList.add('error');
-  document.getElementById('nombreError').classList.add('visible');
-  setTimeout(() => {
-    document.getElementById('nombre').classList.remove('error');
-    document.getElementById('nombreError').classList.remove('visible');
-  }, 4000);
-  valido = false;
-}
-if (!precio || precio <= 0) {
-  document.getElementById('precio').classList.add('error');
-  document.getElementById('precioError').classList.add('visible');
-  setTimeout(() => {
-    document.getElementById('precio').classList.remove('error');
-    document.getElementById('precioError').classList.remove('visible');
-  }, 4000);
-  valido = false;
-}
-if (!categoria || categoria.length < 2) {
-  document.getElementById('categoria').classList.add('error');
-  document.getElementById('categoriaError').classList.add('visible');
-  setTimeout(() => {
-    document.getElementById('categoria').classList.remove('error');
-    document.getElementById('categoriaError').classList.remove('visible');
-  }, 4000);
-  valido = false;
-}
+  if (!nombre || nombre.length < 2) {
+    document.getElementById('nombre').classList.add('error');
+    document.getElementById('nombreError').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('nombre').classList.remove('error');
+      document.getElementById('nombreError').classList.remove('visible');
+    }, 4000);
+    valido = false;
+  }
+  if (!precio || precio <= 0) {
+    document.getElementById('precio').classList.add('error');
+    document.getElementById('precioError').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('precio').classList.remove('error');
+      document.getElementById('precioError').classList.remove('visible');
+    }, 4000);
+    valido = false;
+  }
+  if (!categoria || categoria.length < 2) {
+    document.getElementById('categoria').classList.add('error');
+    document.getElementById('categoriaError').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('categoria').classList.remove('error');
+      document.getElementById('categoriaError').classList.remove('visible');
+    }, 4000);
+    valido = false;
+  }
+  if (isNaN(stock) || stock < 0) {
+    document.getElementById('stock').classList.add('error');
+    document.getElementById('stockError').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('stock').classList.remove('error');
+      document.getElementById('stockError').classList.remove('visible');
+    }, 4000);
+    valido = false;
+  }
 
   return valido;
 }
 
-// Stats
 function actualizarStats(productos) {
   document.getElementById('totalProductos').textContent = productos.length;
   const categorias = [...new Set(productos.map(p => p.categoria))];
@@ -65,7 +72,6 @@ function actualizarStats(productos) {
   document.getElementById('precioPromedio').textContent = '$' + promedio.toFixed(2);
 }
 
-// Filtro categoria
 function actualizarFiltroCategoria(productos) {
   const select = document.getElementById('filterCategoria');
   const categorias = [...new Set(productos.map(p => p.categoria))];
@@ -80,7 +86,6 @@ function actualizarFiltroCategoria(productos) {
   });
 }
 
-// Filtrar
 function filtrarProductos() {
   const busqueda = document.getElementById('searchInput').value.toLowerCase();
   const categoria = document.getElementById('filterCategoria').value;
@@ -94,8 +99,13 @@ function filtrarProductos() {
     filtrados.sort((a, b) => {
       let valA = a[ordenActual.columna];
       let valB = b[ordenActual.columna];
-      if (ordenActual.columna === 'precio') { valA = parseFloat(valA); valB = parseFloat(valB); }
-      else { valA = valA.toLowerCase(); valB = valB.toLowerCase(); }
+      if (ordenActual.columna === 'precio' || ordenActual.columna === 'stock') {
+        valA = parseFloat(valA);
+        valB = parseFloat(valB);
+      } else {
+        valA = valA.toLowerCase();
+        valB = valB.toLowerCase();
+      }
       return ordenActual.asc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
     });
   }
@@ -103,7 +113,6 @@ function filtrarProductos() {
   renderTabla(filtrados);
 }
 
-// Ordenar por columna
 function ordenarPor(columna) {
   if (ordenActual.columna === columna) {
     ordenActual.asc = !ordenActual.asc;
@@ -114,32 +123,33 @@ function ordenarPor(columna) {
   filtrarProductos();
 }
 
-// Render tabla
 function renderTabla(productos) {
   const tbody = document.getElementById('productosTable');
   tbody.innerHTML = '';
   if (productos.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No se encontraron productos</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No se encontraron productos</td></tr>';
     return;
   }
   const idEditando = document.getElementById('productId').value;
   productos.forEach(p => {
     const fila = document.createElement('tr');
     if (String(p.id) === String(idEditando)) fila.classList.add('editando');
+    const stock = p.stock ?? 0;
+    const stockColor = stock === 0 ? 'color:#f44336;font-weight:bold;' : stock < 5 ? 'color:#FF9800;font-weight:bold;' : '';
     fila.innerHTML = `
       <td>${p.id}</td>
       <td>${p.nombre}</td>
       <td>$${parseFloat(p.precio).toFixed(2)}</td>
       <td><span class="badge">${p.categoria}</span></td>
+      <td style="${stockColor}">${stock}</td>
       <td>
-        <button class="btn-edit" onclick="editarProducto(${p.id}, '${p.nombre}', ${p.precio}, '${p.categoria}')">Editar</button>
+        <button class="btn-edit" onclick="editarProducto(${p.id}, '${p.nombre}', ${p.precio}, '${p.categoria}', ${stock})">Editar</button>
         <button class="btn-delete" onclick="confirmarEliminar(${p.id}, '${p.nombre}')">Eliminar</button>
       </td>`;
     tbody.appendChild(fila);
   });
 }
 
-// Cargar productos
 async function cargarProductos() {
   const res = await fetch(API);
   todosLosProductos = await res.json();
@@ -148,7 +158,6 @@ async function cargarProductos() {
   filtrarProductos();
 }
 
-// Submit formulario
 document.getElementById('productForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!validarFormulario()) return;
@@ -156,7 +165,8 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const body = {
     nombre: document.getElementById('nombre').value.trim(),
     precio: parseFloat(document.getElementById('precio').value),
-    categoria: document.getElementById('categoria').value.trim()
+    categoria: document.getElementById('categoria').value.trim(),
+    stock: parseInt(document.getElementById('stock').value) || 0
   };
   if (id) {
     await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -169,12 +179,12 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   cargarProductos();
 });
 
-// Editar
-function editarProducto(id, nombre, precio, categoria) {
+function editarProducto(id, nombre, precio, categoria, stock) {
   document.getElementById('productId').value = id;
   document.getElementById('nombre').value = nombre;
   document.getElementById('precio').value = precio;
   document.getElementById('categoria').value = categoria;
+  document.getElementById('stock').value = stock;
   document.getElementById('formTitle').textContent = 'Editar Producto';
   document.getElementById('submitBtn').textContent = 'Actualizar';
   document.getElementById('submitBtn').className = 'btn-update';
@@ -183,7 +193,6 @@ function editarProducto(id, nombre, precio, categoria) {
   document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Modal eliminar
 function confirmarEliminar(id, nombre) {
   productoAEliminar = id;
   document.getElementById('modalProductoNombre').textContent = nombre;
@@ -203,10 +212,10 @@ async function ejecutarEliminar() {
   cargarProductos();
 }
 
-// Limpiar formulario
 function clearForm() {
   document.getElementById('productForm').reset();
   document.getElementById('productId').value = '';
+  document.getElementById('stock').value = '';
   document.getElementById('formTitle').textContent = 'Agregar Producto';
   document.getElementById('submitBtn').textContent = 'Agregar';
   document.getElementById('submitBtn').className = 'btn-add';
@@ -214,7 +223,6 @@ function clearForm() {
   document.querySelectorAll('tr.editando').forEach(tr => tr.classList.remove('editando'));
 }
 
-// Dark mode
 function toggleDarkMode() {
   document.body.classList.toggle('dark');
   const isDark = document.body.classList.contains('dark');
@@ -222,15 +230,14 @@ function toggleDarkMode() {
   document.getElementById('btnDark').textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
 }
 
-// Export CSV
 function exportarCSV() {
   const busqueda = document.getElementById('searchInput').value.toLowerCase();
   const categoria = document.getElementById('filterCategoria').value;
   const filtrados = todosLosProductos.filter(p => {
     return p.nombre.toLowerCase().includes(busqueda) && (categoria === '' || p.categoria === categoria);
   });
-  const filas = [['ID', 'Nombre', 'Precio', 'Categoria']];
-  filtrados.forEach(p => filas.push([p.id, p.nombre, p.precio, p.categoria]));
+  const filas = [['ID', 'Nombre', 'Precio', 'Categoria', 'Stock']];
+  filtrados.forEach(p => filas.push([p.id, p.nombre, p.precio, p.categoria, p.stock ?? 0]));
   const csv = filas.map(f => f.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
@@ -242,7 +249,6 @@ function exportarCSV() {
   showToast('Exportado correctamente 📊');
 }
 
-// Inicializar
 window.onload = () => {
   const isDark = localStorage.getItem('darkMode') === 'true';
   if (isDark) {
@@ -250,10 +256,8 @@ window.onload = () => {
     document.getElementById('btnDark').textContent = '☀️ Modo claro';
   }
 
-  ['nombre', 'precio', 'categoria'].forEach(id => {
+  ['nombre', 'precio', 'categoria', 'stock'].forEach(id => {
     const input = document.getElementById(id);
-
-    // Al salir del campo — quita el error
     input.addEventListener('blur', () => {
       input.classList.remove('error');
       document.getElementById(id + 'Error').classList.remove('visible');
