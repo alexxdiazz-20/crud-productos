@@ -8,17 +8,17 @@
 <body>
   <div class="toast" id="toast"></div>
 
-<div class="modal-overlay" id="modalEliminar">
-  <div class="modal">
-    <h3>⚠️ Confirmar eliminación</h3>
-    <p>¿Estás seguro de eliminar <strong id="modalProductoNombre"></strong>?</p>
-    <p class="hint">Esta acción no se puede deshacer</p>
-    <div class="btn-group">
-      <button class="btn-confirm" onclick="ejecutarEliminar()">Sí, eliminar</button>
-      <button class="btn-cancelmodal" onclick="cerrarModal()">Cancelar</button>
+  <div class="modal-overlay" id="modalEliminar">
+    <div class="modal">
+      <h3>⚠️ Confirmar eliminación</h3>
+      <p>¿Estás seguro de eliminar <strong id="modalProductoNombre"></strong>?</p>
+      <p class="hint">Esta acción no se puede deshacer</p>
+      <div class="btn-group">
+        <button class="btn-confirm" onclick="ejecutarEliminar()">Sí, eliminar</button>
+        <button class="btn-cancelmodal" onclick="cerrarModal()">Cancelar</button>
+      </div>
     </div>
   </div>
-</div>
 
   <div class="container">
     <div class="toolbar">
@@ -53,6 +53,8 @@
       <div class="error-msg" id="precioError">Ingresa un precio válido mayor a 0</div>
       <input type="text" id="categoria" placeholder="Categoría">
       <div class="error-msg" id="categoriaError">La categoría debe tener al menos 2 caracteres</div>
+      <input type="number" id="stock" placeholder="Stock (cantidad)" min="0">
+      <div class="error-msg" id="stockError">El stock no puede ser negativo</div>
       <div class="btn-group">
         <button type="submit" class="btn-add" id="submitBtn">Agregar</button>
         <button type="button" class="btn-clear" onclick="clearForm()">Limpiar</button>
@@ -74,6 +76,7 @@
           <th onclick="ordenarPor('nombre')">Nombre ↕</th>
           <th onclick="ordenarPor('precio')">Precio ↕</th>
           <th onclick="ordenarPor('categoria')">Categoría ↕</th>
+          <th onclick="ordenarPor('stock')">Stock ↕</th>
           <th>Acciones</th>
         </tr>
       </thead>
