@@ -18,10 +18,13 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const { nombre, precio, categoria, stock } = req.body;
-  if (!nombre || !precio || !categoria)
-    return res.status(400).json({ error: 'Todos los campos son requeridos' });
-
+const { nombre, precio, categoria, stock } = req.body;
+if (!nombre || !precio || !categoria)
+  return res.status(400).json({ error: 'Todos los campos son requeridos' });
+if (precio <= 0 || precio > 999999)
+  return res.status(400).json({ error: 'El precio debe estar entre 0.01 y 999,999' });
+if (stock < 0)
+  return res.status(400).json({ error: 'El stock no puede ser negativo' });
   db.query(
     'INSERT INTO productos (nombre, precio, categoria, stock) VALUES (?, ?, ?, ?)',
     [nombre, precio, categoria, stock || 0],
@@ -34,6 +37,13 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const { nombre, precio, categoria, stock } = req.body;
+  if (!nombre || !precio || !categoria)
+    return res.status(400).json({ error: 'Todos los campos son requeridos' });
+  if (precio <= 0 || precio > 999999)
+    return res.status(400).json({ error: 'El precio debe estar entre 0.01 y 999,999' });
+  if (stock < 0)
+    return res.status(400).json({ error: 'El stock no puede ser negativo' });
+
   db.query(
     'UPDATE productos SET nombre = ?, precio = ?, categoria = ?, stock = ? WHERE id = ?',
     [nombre, precio, categoria, stock || 0, req.params.id],
