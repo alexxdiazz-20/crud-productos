@@ -3,47 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>CRUD Productos</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
-    h1 { text-align: center; margin-bottom: 20px; color: #333; }
-    .container { max-width: 900px; margin: auto; }
-    form { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    form h2 { margin-bottom: 15px; color: #444; }
-    input { width: 100%; padding: 10px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 5px; }
-    input.error { border-color: #f44336; }
-    .error-msg { color: #f44336; font-size: 12px; margin-bottom: 8px; display: none; }
-    .error-msg.visible { display: block; }
-    .toast { position: fixed; top: 20px; right: 20px; background: #4CAF50; color: white; padding: 12px 20px; border-radius: 6px; display: none; z-index: 999; font-size: 14px; }
-    .toast.error { background: #f44336; }
-    .toast.visible { display: block; }
-    .btn-group { display: flex; gap: 8px; margin-top: 5px; }
-    button { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; color: white; }
-    .btn-add { background: #4CAF50; }
-    .btn-update { background: #2196F3; }
-    .btn-clear { background: #9E9E9E; }
-    .btn-cancel { background: #607D8B; display: none; }
-    .search-bar { background: white; padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; gap: 10px; }
-    .search-bar input { margin-bottom: 0; }
-    .search-bar select { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 200px; }
-    .stats { display: flex; gap: 10px; margin-bottom: 20px; }
-    .stat-card { background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); flex: 1; text-align: center; }
-    .stat-card h3 { font-size: 24px; color: #333; }
-    .stat-card p { font-size: 12px; color: #999; margin-top: 4px; }
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    th { background: #333; color: white; padding: 12px; }
-    td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; }
-    tr:hover { background: #f9f9f9; }
-    .btn-edit { background: #FF9800; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; }
-    .btn-delete { background: #f44336; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; margin-left: 5px; }
-    .empty-msg { text-align: center; padding: 20px; color: #999; font-style: italic; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; background: #e3f2fd; color: #1565c0; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay" id="modalEliminar">
+    <div class="modal">
+      <h3>⚠️ Confirmar eliminación</h3>
+      <p>¿Estás seguro de eliminar el producto <strong id="modalProductoNombre"></strong>?</p>
+      <div class="btn-group">
+        <button class="btn-confirm" onclick="ejecutarEliminar()">Sí, eliminar</button>
+        <button class="btn-cancelmodal" onclick="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="container">
-    <h1>Gestión de Productos</h1>
+    <div class="toolbar">
+      <h1>Gestión de Productos</h1>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-export" onclick="exportarCSV()">📊 Exportar CSV</button>
+        <button class="btn-dark" id="btnDark" onclick="toggleDarkMode()">🌙 Modo oscuro</button>
+      </div>
+    </div>
 
     <div class="stats">
       <div class="stat-card">
@@ -64,11 +47,11 @@
       <h2 id="formTitle">Agregar Producto</h2>
       <input type="hidden" id="productId">
       <input type="text" id="nombre" placeholder="Nombre del producto">
-      <div class="error-msg" id="nombreError">El nombre es requerido</div>
-      <input type="number" id="precio" placeholder="Precio" step="0.01">
+      <div class="error-msg" id="nombreError">El nombre debe tener al menos 2 caracteres</div>
+      <input type="number" id="precio" placeholder="Precio" step="0.01" min="0.01">
       <div class="error-msg" id="precioError">Ingresa un precio válido mayor a 0</div>
       <input type="text" id="categoria" placeholder="Categoría">
-      <div class="error-msg" id="categoriaError">La categoría es requerida</div>
+      <div class="error-msg" id="categoriaError">La categoría debe tener al menos 2 caracteres</div>
       <div class="btn-group">
         <button type="submit" class="btn-add" id="submitBtn">Agregar</button>
         <button type="button" class="btn-clear" onclick="clearForm()">Limpiar</button>
@@ -87,9 +70,9 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>Nombre</th>
-          <th>Precio</th>
-          <th>Categoría</th>
+          <th onclick="ordenarPor('nombre')">Nombre ↕</th>
+          <th onclick="ordenarPor('precio')">Precio ↕</th>
+          <th onclick="ordenarPor('categoria')">Categoría ↕</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -97,147 +80,6 @@
     </table>
   </div>
 
-  <script>
-    const API = 'http://localhost:3000/api/productos';
-    let todosLosProductos = [];
-
-    function showToast(msg, isError = false) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.className = 'toast visible' + (isError ? ' error' : '');
-      setTimeout(() => toast.className = 'toast', 3000);
-    }
-
-    function validarFormulario() {
-      let valido = true;
-      const nombre = document.getElementById('nombre').value.trim();
-      const precio = parseFloat(document.getElementById('precio').value);
-      const categoria = document.getElementById('categoria').value.trim();
-
-      ['nombre', 'precio', 'categoria'].forEach(id => {
-        document.getElementById(id).classList.remove('error');
-        document.getElementById(id + 'Error').classList.remove('visible');
-      });
-
-      if (!nombre) { document.getElementById('nombre').classList.add('error'); document.getElementById('nombreError').classList.add('visible'); valido = false; }
-      if (!precio || precio <= 0) { document.getElementById('precio').classList.add('error'); document.getElementById('precioError').classList.add('visible'); valido = false; }
-      if (!categoria) { document.getElementById('categoria').classList.add('error'); document.getElementById('categoriaError').classList.add('visible'); valido = false; }
-
-      return valido;
-    }
-
-    function actualizarStats(productos) {
-      document.getElementById('totalProductos').textContent = productos.length;
-      const categorias = [...new Set(productos.map(p => p.categoria))];
-      document.getElementById('totalCategorias').textContent = categorias.length;
-      const promedio = productos.length > 0 ? productos.reduce((a, p) => a + parseFloat(p.precio), 0) / productos.length : 0;
-      document.getElementById('precioPromedio').textContent = '$' + promedio.toFixed(2);
-    }
-
-    function actualizarFiltroCategoria(productos) {
-      const select = document.getElementById('filterCategoria');
-      const categorias = [...new Set(productos.map(p => p.categoria))];
-      const valorActual = select.value;
-      select.innerHTML = '<option value="">Todas las categorías</option>';
-      categorias.forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
-        if (c === valorActual) opt.selected = true;
-        select.appendChild(opt);
-      });
-    }
-
-    function filtrarProductos() {
-      const busqueda = document.getElementById('searchInput').value.toLowerCase();
-      const categoria = document.getElementById('filterCategoria').value;
-      const filtrados = todosLosProductos.filter(p => {
-        const coincideNombre = p.nombre.toLowerCase().includes(busqueda);
-        const coincideCategoria = categoria === '' || p.categoria === categoria;
-        return coincideNombre && coincideCategoria;
-      });
-      renderTabla(filtrados);
-    }
-
-    function renderTabla(productos) {
-      const tbody = document.getElementById('productosTable');
-      tbody.innerHTML = '';
-      if (productos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">No se encontraron productos</td></tr>';
-        return;
-      }
-      productos.forEach(p => {
-        tbody.innerHTML += `
-          <tr>
-            <td>${p.id}</td>
-            <td>${p.nombre}</td>
-            <td>$${parseFloat(p.precio).toFixed(2)}</td>
-            <td><span class="badge">${p.categoria}</span></td>
-            <td>
-              <button class="btn-edit" onclick="editarProducto(${p.id}, '${p.nombre}', ${p.precio}, '${p.categoria}')">Editar</button>
-              <button class="btn-delete" onclick="eliminarProducto(${p.id})">Eliminar</button>
-            </td>
-          </tr>`;
-      });
-    }
-
-    async function cargarProductos() {
-      const res = await fetch(API);
-      todosLosProductos = await res.json();
-      actualizarStats(todosLosProductos);
-      actualizarFiltroCategoria(todosLosProductos);
-      filtrarProductos();
-    }
-
-    document.getElementById('productForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (!validarFormulario()) return;
-      const id = document.getElementById('productId').value;
-      const body = {
-        nombre: document.getElementById('nombre').value.trim(),
-        precio: parseFloat(document.getElementById('precio').value),
-        categoria: document.getElementById('categoria').value.trim()
-      };
-      if (id) {
-        await fetch(`${API}/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        showToast('Producto actualizado correctamente ✏️');
-      } else {
-        await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-        showToast('Producto agregado correctamente ✅');
-      }
-      clearForm();
-      cargarProductos();
-    });
-
-    function editarProducto(id, nombre, precio, categoria) {
-      document.getElementById('productId').value = id;
-      document.getElementById('nombre').value = nombre;
-      document.getElementById('precio').value = precio;
-      document.getElementById('categoria').value = categoria;
-      document.getElementById('formTitle').textContent = 'Editar Producto';
-      document.getElementById('submitBtn').textContent = 'Actualizar';
-      document.getElementById('submitBtn').className = 'btn-update';
-      document.getElementById('cancelBtn').style.display = 'inline-block';
-    }
-
-    async function eliminarProducto(id) {
-      if (confirm('¿Estás seguro de eliminar este producto?')) {
-        await fetch(`${API}/${id}`, { method: 'DELETE' });
-        showToast('Producto eliminado 🗑️', true);
-        cargarProductos();
-      }
-    }
-
-    function clearForm() {
-      document.getElementById('productForm').reset();
-      document.getElementById('productId').value = '';
-      document.getElementById('formTitle').textContent = 'Agregar Producto';
-      document.getElementById('submitBtn').textContent = 'Agregar';
-      document.getElementById('submitBtn').className = 'btn-add';
-      document.getElementById('cancelBtn').style.display = 'none';
-    }
-
-    cargarProductos();
-  </script>
+  <script src="main.js"></script>
 </body>
 </html>
