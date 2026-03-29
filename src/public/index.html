@@ -8,16 +8,17 @@
 <body>
   <div class="toast" id="toast"></div>
 
-  <div class="modal-overlay" id="modalEliminar">
-    <div class="modal">
-      <h3>⚠️ Confirmar eliminación</h3>
-      <p>¿Estás seguro de eliminar el producto <strong id="modalProductoNombre"></strong>?</p>
-      <div class="btn-group">
-        <button class="btn-confirm" onclick="ejecutarEliminar()">Sí, eliminar</button>
-        <button class="btn-cancelmodal" onclick="cerrarModal()">Cancelar</button>
-      </div>
+<div class="modal-overlay" id="modalEliminar">
+  <div class="modal">
+    <h3>⚠️ Confirmar eliminación</h3>
+    <p>¿Estás seguro de eliminar <strong id="modalProductoNombre"></strong>?</p>
+    <p class="hint">Esta acción no se puede deshacer</p>
+    <div class="btn-group">
+      <button class="btn-confirm" onclick="ejecutarEliminar()">Sí, eliminar</button>
+      <button class="btn-cancelmodal" onclick="cerrarModal()">Cancelar</button>
     </div>
   </div>
+</div>
 
   <div class="container">
     <div class="toolbar">
