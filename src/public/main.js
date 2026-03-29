@@ -31,15 +31,15 @@ function validarFormulario() {
     }, 4000);
     valido = false;
   }
-  if (!precio || precio <= 0) {
-    document.getElementById('precio').classList.add('error');
-    document.getElementById('precioError').classList.add('visible');
-    setTimeout(() => {
-      document.getElementById('precio').classList.remove('error');
-      document.getElementById('precioError').classList.remove('visible');
-    }, 4000);
-    valido = false;
-  }
+if (!precio || precio <= 0 || precio > 999999) {
+  document.getElementById('precio').classList.add('error');
+  document.getElementById('precioError').classList.add('visible');
+  setTimeout(() => {
+    document.getElementById('precio').classList.remove('error');
+    document.getElementById('precioError').classList.remove('visible');
+  }, 4000);
+  valido = false;
+}
   if (!categoria || categoria.length < 2) {
     document.getElementById('categoria').classList.add('error');
     document.getElementById('categoriaError').classList.add('visible');
