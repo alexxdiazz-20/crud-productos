@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - CRUD Productos</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f0f2f5; }
+    .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); width: 100%; max-width: 400px; }
+    .login-card h1 { text-align: center; color: #333; margin-bottom: 8px; font-size: 28px; }
+    .login-card p { text-align: center; color: #999; margin-bottom: 30px; font-size: 14px; }
+    .login-card input { width: 100%; padding: 12px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+    .login-card input.error { border-color: #f44336; }
+    .error-msg { color: #f44336; font-size: 12px; margin-bottom: 10px; display: none; }
+    .error-msg.visible { display: block; }
+    .btn-login { width: 100%; padding: 12px; background: #4CAF50; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+    .btn-login:hover { background: #43A047; }
+    .toast { position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 12px 20px; border-radius: 6px; display: none; z-index: 999; }
+    .toast.visible { display: block; }
+    .hint { text-align: center; margin-top: 20px; font-size: 12px; color: #999; background: #f9f9f9; padding: 10px; border-radius: 6px; }
+    body.dark { background: #1a1a2e; }
+    body.dark .login-card { background: #16213e; }
+    body.dark .login-card h1 { color: #eee; }
+    body.dark .login-card input { background: #0f3460; border-color: #444; color: #eee; }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+  <div class="login-card">
+    <h1>🔐 Iniciar Sesión</h1>
+    <p>Gestión de Productos</p>
+
+    <input type="email" id="email" placeholder="Correo electrónico">
+    <div class="error-msg" id="emailError">Ingresa un correo válido</div>
+
+    <div style="position:relative;">
+    <input type="password" id="password" placeholder="Contraseña" style="padding-right:40px;">
+    <button type="button" onclick="togglePassword()" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:18px; color:#999; padding:0;" id="btnOjo">👁️</button>
+    </div>
+    <div class="error-msg" id="passwordError">La contraseña es requerida</div>
+
+    <button class="btn-login" id="btnLogin" onclick="login()">Entrar</button>
+
+    <div class="hint">
+      Usuario por defecto:<br>
+      <strong>admin@crud.com</strong> / <strong>admin123</strong>
+    </div>
+  </div>
+
+  <script>
+    // Aplicar dark mode si estaba activo
+    if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark');
+
+    // Verificar si ya está logueado
+    fetch('/auth/session').then(r => r.json()).then(data => {
+      if (data.loggedIn) window.location.href = '/';
+    });
+
+// Visualizar contraseña
+
+function togglePassword() {
+  const input = document.getElementById('password');
+  const btn = document.getElementById('btnOjo');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+    async function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      // Limpiar errores
+      document.getElementById('email').classList.remove('error');
+      document.getElementById('password').classList.remove('error');
+      document.getElementById('emailError').classList.remove('visible');
+      document.getElementById('passwordError').classList.remove('visible');
+
+      let valido = true;
+      if (!email) {
+        document.getElementById('email').classList.add('error');
+        document.getElementById('emailError').classList.add('visible');
+        valido = false;
+      }
+      if (!password) {
+        document.getElementById('password').classList.add('error');
+        document.getElementById('passwordError').classList.add('visible');
+        valido = false;
+      }
+      if (!valido) return;
+
+      document.getElementById('btnLogin').textContent = 'Entrando...';
+      document.getElementById('btnLogin').disabled = true;
+
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.href = '/';
+        } else {
+          const toast = document.getElementById('toast');
+          toast.textContent = data.error || 'Credenciales incorrectas';
+          toast.className = 'toast visible';
+          setTimeout(() => toast.className = 'toast', 3000);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+
+      document.getElementById('btnLogin').textContent = 'Entrar';
+      document.getElementById('btnLogin').disabled = false;
+    }
+
+    // Enter para login
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') login();
+    });
+  </script>
+</body>
+</html>
