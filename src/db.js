@@ -24,13 +24,32 @@ db.query(`
     stock INT NOT NULL DEFAULT 0
   )
 `, (err) => {
-  if (err) console.error('Error creando tabla:', err);
+  if (err) console.error('Error creando tabla productos:', err);
 });
 
 db.query(`ALTER TABLE productos ADD COLUMN IF NOT EXISTS stock INT NOT NULL DEFAULT 0`, (err) => {
   if (err && !err.message.includes('Duplicate column')) {
     console.error('Error alterando tabla:', err);
   }
+});
+
+db.query(`
+  CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )
+`, (err) => {
+  if (err) console.error('Error creando tabla usuarios:', err);
+});
+
+// Usuario por defecto: admin / admin123
+db.query(`
+  INSERT IGNORE INTO usuarios (nombre, email, password) VALUES ('Administrador', 'admin@crud.com', 'admin123')
+`, (err) => {
+  if (err) console.error('Error insertando usuario por defecto:', err);
 });
 
 module.exports = db;

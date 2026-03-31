@@ -249,7 +249,25 @@ function exportarCSV() {
   showToast('Exportado correctamente 📊');
 }
 
+// Verificar sesion
+async function verificarSesion() {
+  const res = await fetch('/auth/session');
+  const data = await res.json();
+  if (!data.loggedIn) {
+    window.location.href = '/auth/login';
+  } else {
+    document.getElementById('usuarioNombre').textContent = '👤 ' + data.usuario.nombre;
+  }
+}
+
+// Logout
+async function logout() {
+  await fetch('/auth/logout', { method: 'POST' });
+  window.location.href = '/auth/login';
+}
+
 window.onload = () => {
+  verificarSesion(); // Redirige a login si no hay sesión
   const isDark = localStorage.getItem('darkMode') === 'true';
   if (isDark) {
     document.body.classList.add('dark');
