@@ -19,9 +19,11 @@
   },
   "homepage": "https://github.com/alexxdiazz-20/crud-productos#readme",
   "dependencies": {
+    "chromedriver": "^147.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "mysql2": "^3.20.0"
+    "mysql2": "^3.20.0",
+    "selenium-webdriver": "^4.41.0"
   }
 }

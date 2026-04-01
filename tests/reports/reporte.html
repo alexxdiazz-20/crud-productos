@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporte de Pruebas Selenium - CRUD Productos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 30px; }
+    .header { background: #1F3864; color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px; }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .header p { color: #ccc; font-size: 14px; margin-top: 6px; }
+    .stats { display: flex; gap: 20px; margin-bottom: 30px; }
+    .stat { background: white; padding: 20px 30px; border-radius: 10px; text-align: center; flex: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .stat h2 { font-size: 36px; margin-bottom: 5px; }
+    .stat p { color: #666; font-size: 14px; }
+    .total h2 { color: #1F3864; }
+    .passed h2 { color: #4CAF50; }
+    .failed h2 { color: #f44336; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    th { background: #1F3864; color: white; padding: 14px; text-align: left; font-size: 13px; }
+    td { padding: 12px 14px; border-bottom: 1px solid #eee; font-size: 13px; }
+    tr.pass { background: #f1fff1; }
+    tr.fail { background: #fff1f1; }
+    .badge-tipo { background: #e3f2fd; color: #1565c0; padding: 3px 8px; border-radius: 12px; font-size: 11px; }
+    .badge-estado { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+    .badge-pass { background: #4CAF50; color: white; }
+    .badge-fail { background: #f44336; color: white; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 Reporte de Pruebas Automatizadas</h1>
+    <p>Proyecto: CRUD Productos | Herramienta: Selenium WebDriver | Lenguaje: JavaScript</p>
+    <p>Estudiante: Alex Díaz | Matrícula: 2024-0244</p>
+    <p>Fecha: 31/3/2026, 8:26:17 p. m.</p>
+  </div>
+  <div class="stats">
+    <div class="stat total"><h2>12</h2><p>Total de pruebas</p></div>
+    <div class="stat passed"><h2>12</h2><p>Pruebas exitosas</p></div>
+    <div class="stat failed"><h2>0</h2><p>Pruebas fallidas</p></div>
+    <div class="stat"><h2>100%</h2><p>Tasa de éxito</p></div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Historia</th>
+        <th>Caso de prueba</th>
+        <th>Tipo</th>
+        <th>Estado</th>
+        <th>Error</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr class="pass">
+      <td>HU-01</td>
+      <td>Login exitoso</td>
+      <td><span class="badge-tipo">Camino feliz</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:19 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-02</td>
+      <td>Login - credenciales incorrectas</td>
+      <td><span class="badge-tipo">Prueba negativa</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:25 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-02</td>
+      <td>Login - campos vacíos</td>
+      <td><span class="badge-tipo">Prueba de límites</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:29 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-03</td>
+      <td>Crear producto</td>
+      <td><span class="badge-tipo">Camino feliz</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:35 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-03</td>
+      <td>Crear producto - campos vacíos</td>
+      <td><span class="badge-tipo">Prueba negativa</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:36 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-03</td>
+      <td>Crear producto - precio negativo</td>
+      <td><span class="badge-tipo">Prueba de límites</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:38 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-04</td>
+      <td>Editar producto</td>
+      <td><span class="badge-tipo">Camino feliz</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:49 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-04</td>
+      <td>Editar producto - precio vacio</td>
+      <td><span class="badge-tipo">Prueba negativa</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:52 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-04</td>
+      <td>Editar producto - nombre muy corto</td>
+      <td><span class="badge-tipo">Prueba de límites</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:25:55 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-05</td>
+      <td>Eliminar producto</td>
+      <td><span class="badge-tipo">Camino feliz</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:26:06 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-05</td>
+      <td>Eliminar producto - cancelar</td>
+      <td><span class="badge-tipo">Prueba negativa</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:26:11 p. m.</td>
+    </tr>
+  
+    <tr class="pass">
+      <td>HU-05</td>
+      <td>Eliminar - tabla actualizada</td>
+      <td><span class="badge-tipo">Prueba de límites</span></td>
+      <td><span class="badge-estado badge-pass">PASÓ</span></td>
+      <td>-</td>
+      <td>31/3/2026, 8:26:14 p. m.</td>
+    </tr>
+  </tbody>
+  </table>
+</body>
+</html>
