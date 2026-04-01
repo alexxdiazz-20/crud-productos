@@ -13,7 +13,6 @@ function showToast(msg, isError = false) {
 function validarFormulario() {
   let valido = true;
   const nombre = document.getElementById('nombre').value.trim();
-  const precio = parseFloat(document.getElementById('precio').value);
   const categoria = document.getElementById('categoria').value.trim();
   const stock = parseInt(document.getElementById('stock').value);
 
@@ -31,15 +30,21 @@ function validarFormulario() {
     }, 4000);
     valido = false;
   }
-if (!precio || precio <= 0 || precio > 999999) {
-  document.getElementById('precio').classList.add('error');
-  document.getElementById('precioError').classList.add('visible');
-  setTimeout(() => {
-    document.getElementById('precio').classList.remove('error');
-    document.getElementById('precioError').classList.remove('visible');
-  }, 4000);
-  valido = false;
-}
+
+  // Leer precio justo aqui
+  const precioVal = document.getElementById('precio').value;
+  const precio = parseFloat(precioVal);
+
+  if (!precioVal || isNaN(precio) || precio <= 0) {
+    document.getElementById('precio').classList.add('error');
+    document.getElementById('precioError').classList.add('visible');
+    setTimeout(() => {
+      document.getElementById('precio').classList.remove('error');
+      document.getElementById('precioError').classList.remove('visible');
+    }, 4000);
+    valido = false;
+  }
+
   if (!categoria || categoria.length < 2) {
     document.getElementById('categoria').classList.add('error');
     document.getElementById('categoriaError').classList.add('visible');
@@ -49,6 +54,7 @@ if (!precio || precio <= 0 || precio > 999999) {
     }, 4000);
     valido = false;
   }
+
   if (isNaN(stock) || stock < 0) {
     document.getElementById('stock').classList.add('error');
     document.getElementById('stockError').classList.add('visible');
