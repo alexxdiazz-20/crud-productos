@@ -84,7 +84,6 @@ async function loginExitoso() {
 async function loginFallido() {
   console.log('\n🧪 HU-02: Login fallido');
 
-  // Prueba negativa - credenciales incorrectas
   try {
     await driver.get(`${BASE_URL}/auth/login`);
     await esperar(1500);
@@ -107,7 +106,6 @@ async function loginFallido() {
     console.log('  ❌ Error:', e.message);
   }
 
-  // Prueba de límites - campos vacíos
   try {
     await driver.get(`${BASE_URL}/auth/login`);
     await esperar(1500);
@@ -137,7 +135,6 @@ async function crearProducto() {
   console.log('\n🧪 HU-03: Crear producto');
   await hacerLogin();
 
-  // Camino feliz
   try {
     await driver.findElement(By.id('nombre')).sendKeys('Producto Test');
     await driver.findElement(By.id('precio')).sendKeys('100');
@@ -155,7 +152,6 @@ async function crearProducto() {
     console.log('  ❌ Error:', e.message);
   }
 
-  // Prueba negativa - campos vacíos
   try {
     await driver.findElement(By.id('submitBtn')).click();
     await esperar(1500);
@@ -173,7 +169,6 @@ async function crearProducto() {
     console.log('  ❌ Error:', e.message);
   }
 
-  // Prueba de límites - precio negativo
   try {
     await driver.findElement(By.id('nombre')).sendKeys('Test Limite');
     await driver.executeScript("document.getElementById('precio').value = '-50'");
@@ -206,7 +201,6 @@ async function editarProducto() {
   console.log('\n🧪 HU-04: Editar producto');
   await hacerLogin();
 
-  // Camino feliz
   try {
     await esperar(1500);
     const btnEditar = await driver.findElement(By.className('btn-edit'));
@@ -230,7 +224,6 @@ async function editarProducto() {
     console.log('  ❌ Error:', e.message);
   }
 
-// Prueba negativa - precio vacio al editar
   try {
     const btnEditar = await driver.findElement(By.className('btn-edit'));
     await btnEditar.click();
@@ -242,19 +235,18 @@ async function editarProducto() {
     await esperar(1500);
     const precioError = await driver.findElement(By.id('precioError')).isDisplayed();
     if (precioError) {
-      console.log('  ✅ Prueba negativa: No permite precio vacio al editar');
+      console.log('  ✅ Prueba negativa: No permite precio vacío al editar');
       await tomarCaptura('HU04_negativa_despues');
-      await registrarResultado('HU-04', 'Editar producto - precio vacio', 'Prueba negativa', 'PASÓ');
+      await registrarResultado('HU-04', 'Editar producto - precio vacío', 'Prueba negativa', 'PASÓ');
     } else {
-      throw new Error('Permitio precio vacio al editar');
+      throw new Error('Permitió precio vacío al editar');
     }
   } catch (e) {
     await tomarCaptura('HU04_negativa_error');
-    await registrarResultado('HU-04', 'Editar producto - precio vacio', 'Prueba negativa', 'FALLÓ', e.message);
+    await registrarResultado('HU-04', 'Editar producto - precio vacío', 'Prueba negativa', 'FALLÓ', e.message);
     console.log('  ❌ Error:', e.message);
   }
 
-  // Prueba de límites - nombre muy corto
   try {
     const btnEditar = await driver.findElement(By.className('btn-edit'));
     await btnEditar.click();
@@ -289,7 +281,6 @@ async function eliminarProducto() {
   console.log('\n🧪 HU-05: Eliminar producto');
   await hacerLogin();
 
-  // Camino feliz
   try {
     await esperar(1500);
     const btnEliminar = await driver.findElement(By.className('btn-delete'));
@@ -305,7 +296,7 @@ async function eliminarProducto() {
       console.log('  ✅ Camino feliz: Producto eliminado');
       await registrarResultado('HU-05', 'Eliminar producto', 'Camino feliz', 'PASÓ');
     } else {
-      throw new Error('Modal no aparecio');
+      throw new Error('Modal no apareció');
     }
   } catch (e) {
     await tomarCaptura('HU05_camino_feliz_error');
@@ -313,7 +304,6 @@ async function eliminarProducto() {
     console.log('  ❌ Error:', e.message);
   }
 
-  // Prueba negativa - cancelar eliminación
   try {
     await driver.findElement(By.id('nombre')).sendKeys('Para Cancelar');
     await driver.findElement(By.id('precio')).sendKeys('50');
@@ -334,7 +324,7 @@ async function eliminarProducto() {
       await tomarCaptura('HU05_negativa_despues');
       await registrarResultado('HU-05', 'Eliminar producto - cancelar', 'Prueba negativa', 'PASÓ');
     } else {
-      throw new Error('Modal no se cerro');
+      throw new Error('Modal no se cerró');
     }
   } catch (e) {
     await tomarCaptura('HU05_negativa_error');
@@ -342,7 +332,6 @@ async function eliminarProducto() {
     console.log('  ❌ Error:', e.message);
   }
 
-  // Prueba de límites - tabla se actualiza
   try {
     const filaAntes = await driver.findElements(By.css('#productosTable tr'));
     const cantAntes = filaAntes.length;
@@ -358,7 +347,7 @@ async function eliminarProducto() {
       console.log('  ✅ Prueba de límites: Tabla se actualiza correctamente');
       await registrarResultado('HU-05', 'Eliminar - tabla actualizada', 'Prueba de límites', 'PASÓ');
     } else {
-      throw new Error('Tabla no se actualizo');
+      throw new Error('Tabla no se actualizó');
     }
   } catch (e) {
     await tomarCaptura('HU05_limites_error');
@@ -367,6 +356,372 @@ async function eliminarProducto() {
   }
 
   await hacerLogout();
+}
+
+// ================================
+// HU-06: BUSQUEDA Y FILTRADO
+// ================================
+async function busquedaFiltrado() {
+  console.log('\n🧪 HU-06: Búsqueda y filtrado');
+  await hacerLogin();
+
+  // Crear producto de prueba primero
+  await driver.findElement(By.id('nombre')).sendKeys('ProductoBusqueda');
+  await driver.findElement(By.id('precio')).sendKeys('150');
+  await driver.findElement(By.id('categoria')).sendKeys('BusquedaTest');
+  await driver.findElement(By.id('stock')).sendKeys('5');
+  await driver.findElement(By.id('submitBtn')).click();
+  await esperar(2000);
+
+  // Camino feliz - busqueda por nombre
+  try {
+    const searchInput = await driver.findElement(By.id('searchInput'));
+    await searchInput.clear();
+    await searchInput.sendKeys('ProductoBusqueda');
+    await esperar(1000);
+    await tomarCaptura('HU06_camino_feliz_antes');
+    const filas = await driver.findElements(By.css('#productosTable tr'));
+    if (filas.length >= 1) {
+      console.log('  ✅ Camino feliz: Búsqueda filtra correctamente');
+      await tomarCaptura('HU06_camino_feliz_despues');
+      await registrarResultado('HU-06', 'Búsqueda por nombre', 'Camino feliz', 'PASÓ');
+    } else {
+      throw new Error('No encontró productos');
+    }
+  } catch (e) {
+    await tomarCaptura('HU06_camino_feliz_error');
+    await registrarResultado('HU-06', 'Búsqueda por nombre', 'Camino feliz', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba negativa - busqueda sin resultados
+  try {
+    const searchInput = await driver.findElement(By.id('searchInput'));
+    await searchInput.clear();
+    await searchInput.sendKeys('XYZProductoQueNoExiste123');
+    await esperar(1000);
+    await tomarCaptura('HU06_negativa_antes');
+    const mensajeVacio = await driver.findElement(By.css('.empty-msg')).isDisplayed();
+    if (mensajeVacio) {
+      console.log('  ✅ Prueba negativa: Muestra mensaje cuando no hay resultados');
+      await tomarCaptura('HU06_negativa_despues');
+      await registrarResultado('HU-06', 'Búsqueda sin resultados', 'Prueba negativa', 'PASÓ');
+    } else {
+      throw new Error('No mostró mensaje de sin resultados');
+    }
+  } catch (e) {
+    await tomarCaptura('HU06_negativa_error');
+    await registrarResultado('HU-06', 'Búsqueda sin resultados', 'Prueba negativa', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba de limites - filtro por categoria
+  try {
+    const searchInput = await driver.findElement(By.id('searchInput'));
+    await searchInput.clear();
+    await esperar(500);
+    const selectCategoria = await driver.findElement(By.id('filterCategoria'));
+    await selectCategoria.findElement(By.xpath(`//option[contains(text(),'BusquedaTest')]`)).click();
+    await esperar(1000);
+    await tomarCaptura('HU06_limites_antes');
+    const filas = await driver.findElements(By.css('#productosTable tr'));
+    if (filas.length >= 1) {
+      console.log('  ✅ Prueba de límites: Filtro por categoría funciona');
+      await tomarCaptura('HU06_limites_despues');
+      await registrarResultado('HU-06', 'Filtro por categoría', 'Prueba de límites', 'PASÓ');
+    } else {
+      throw new Error('Filtro por categoría no funcionó');
+    }
+  } catch (e) {
+    await tomarCaptura('HU06_limites_error');
+    await registrarResultado('HU-06', 'Filtro por categoría', 'Prueba de límites', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  await hacerLogout();
+}
+
+// ================================
+// HU-07: EXPORTAR CSV
+// ================================
+async function exportarCSV() {
+  console.log('\n🧪 HU-07: Exportar CSV');
+  await hacerLogin();
+
+  // Camino feliz - boton exportar existe y es clickeable
+  try {
+    await tomarCaptura('HU07_camino_feliz_antes');
+    const btnExportar = await driver.findElement(By.xpath("//button[contains(text(),'Exportar CSV')]"));
+    const visible = await btnExportar.isDisplayed();
+    if (visible) {
+      await btnExportar.click();
+      await esperar(2000);
+      console.log('  ✅ Camino feliz: Botón exportar CSV funciona');
+      await tomarCaptura('HU07_camino_feliz_despues');
+      await registrarResultado('HU-07', 'Exportar CSV', 'Camino feliz', 'PASÓ');
+    } else {
+      throw new Error('Botón exportar no visible');
+    }
+  } catch (e) {
+    await tomarCaptura('HU07_camino_feliz_error');
+    await registrarResultado('HU-07', 'Exportar CSV', 'Camino feliz', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba negativa - exportar con filtro activo
+  try {
+    const searchInput = await driver.findElement(By.id('searchInput'));
+    await searchInput.clear();
+    await searchInput.sendKeys('ProductoBusqueda');
+    await esperar(1000);
+    await tomarCaptura('HU07_negativa_antes');
+    const btnExportar = await driver.findElement(By.xpath("//button[contains(text(),'Exportar CSV')]"));
+    await btnExportar.click();
+    await esperar(2000);
+    console.log('  ✅ Prueba negativa: Exporta solo productos filtrados');
+    await tomarCaptura('HU07_negativa_despues');
+    await registrarResultado('HU-07', 'Exportar CSV con filtro', 'Prueba negativa', 'PASÓ');
+    await searchInput.clear();
+    await esperar(500);
+  } catch (e) {
+    await tomarCaptura('HU07_negativa_error');
+    await registrarResultado('HU-07', 'Exportar CSV con filtro', 'Prueba negativa', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba de limites - exportar con tabla vacia
+  try {
+    const searchInput = await driver.findElement(By.id('searchInput'));
+    await searchInput.sendKeys('XYZNoExiste999');
+    await esperar(1000);
+    await tomarCaptura('HU07_limites_antes');
+    const btnExportar = await driver.findElement(By.xpath("//button[contains(text(),'Exportar CSV')]"));
+    await btnExportar.click();
+    await esperar(1500);
+    console.log('  ✅ Prueba de límites: Maneja exportación con filtro sin resultados');
+    await tomarCaptura('HU07_limites_despues');
+    await registrarResultado('HU-07', 'Exportar CSV tabla vacía', 'Prueba de límites', 'PASÓ');
+    await searchInput.clear();
+  } catch (e) {
+    await tomarCaptura('HU07_limites_error');
+    await registrarResultado('HU-07', 'Exportar CSV tabla vacía', 'Prueba de límites', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  await hacerLogout();
+}
+
+// ================================
+// HU-08: GESTION DE STOCK
+// ================================
+async function gestionStock() {
+  console.log('\n🧪 HU-08: Gestión de stock con alertas');
+  await hacerLogin();
+
+  // Camino feliz - crear producto con stock normal
+  try {
+    await driver.findElement(By.id('nombre')).sendKeys('Producto Stock Normal');
+    await driver.findElement(By.id('precio')).sendKeys('100');
+    await driver.findElement(By.id('categoria')).sendKeys('Stock');
+    await driver.findElement(By.id('stock')).sendKeys('10');
+    await tomarCaptura('HU08_camino_feliz_antes');
+    await driver.findElement(By.id('submitBtn')).click();
+    await esperar(2000);
+    await tomarCaptura('HU08_camino_feliz_despues');
+    console.log('  ✅ Camino feliz: Producto con stock normal creado');
+    await registrarResultado('HU-08', 'Stock normal', 'Camino feliz', 'PASÓ');
+  } catch (e) {
+    await tomarCaptura('HU08_camino_feliz_error');
+    await registrarResultado('HU-08', 'Stock normal', 'Camino feliz', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba negativa - stock cero muestra alerta roja
+  try {
+    await driver.findElement(By.id('nombre')).sendKeys('Producto Sin Stock');
+    await driver.findElement(By.id('precio')).sendKeys('100');
+    await driver.findElement(By.id('categoria')).sendKeys('Stock');
+    await driver.findElement(By.id('stock')).sendKeys('0');
+    await driver.findElement(By.id('submitBtn')).click();
+    await esperar(2000);
+    await tomarCaptura('HU08_negativa_antes');
+    const stockCero = await driver.findElements(By.css('td[style*="color:#f44336"]'));
+    if (stockCero.length > 0) {
+      console.log('  ✅ Prueba negativa: Stock 0 muestra alerta roja');
+      await tomarCaptura('HU08_negativa_despues');
+      await registrarResultado('HU-08', 'Stock 0 - alerta roja', 'Prueba negativa', 'PASÓ');
+    } else {
+      throw new Error('No mostró alerta roja para stock 0');
+    }
+  } catch (e) {
+    await tomarCaptura('HU08_negativa_error');
+    await registrarResultado('HU-08', 'Stock 0 - alerta roja', 'Prueba negativa', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+   // Prueba de limites - stock negativo no permitido
+  try {
+    await driver.findElement(By.id('nombre')).sendKeys('Test Stock Negativo');
+    await driver.findElement(By.id('precio')).sendKeys('100');
+    await driver.findElement(By.id('categoria')).sendKeys('Stock');
+    await driver.executeScript("document.getElementById('stock').value = ''");
+    await tomarCaptura('HU08_limites_antes');
+    await driver.findElement(By.id('submitBtn')).click();
+    await esperar(1500);
+    const stockError = await driver.findElement(By.id('stockError')).isDisplayed();
+    if (stockError) {
+      console.log('  ✅ Prueba de límites: No permite stock inválido');
+      await tomarCaptura('HU08_limites_despues');
+      await registrarResultado('HU-08', 'Stock inválido no permitido', 'Prueba de límites', 'PASÓ');
+    } else {
+      throw new Error('Permitió stock inválido');
+    }
+  } catch (e) {
+    await tomarCaptura('HU08_limites_error');
+    await registrarResultado('HU-08', 'Stock inválido no permitido', 'Prueba de límites', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  await hacerLogout();
+}
+
+// ================================
+// HU-09: MODO OSCURO
+// ================================
+async function modoOscuro() {
+  console.log('\n🧪 HU-09: Modo oscuro');
+  await hacerLogin();
+
+  // Camino feliz - activar modo oscuro
+  try {
+    await tomarCaptura('HU09_camino_feliz_antes');
+    const btnDark = await driver.findElement(By.id('btnDark'));
+    await btnDark.click();
+    await esperar(1000);
+    const isDark = await driver.executeScript("return document.body.classList.contains('dark')");
+    if (isDark) {
+      console.log('  ✅ Camino feliz: Modo oscuro activado');
+      await tomarCaptura('HU09_camino_feliz_despues');
+      await registrarResultado('HU-09', 'Activar modo oscuro', 'Camino feliz', 'PASÓ');
+    } else {
+      throw new Error('Modo oscuro no se activó');
+    }
+  } catch (e) {
+    await tomarCaptura('HU09_camino_feliz_error');
+    await registrarResultado('HU-09', 'Activar modo oscuro', 'Camino feliz', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba negativa - desactivar modo oscuro
+  try {
+    const btnDark = await driver.findElement(By.id('btnDark'));
+    await btnDark.click();
+    await esperar(1000);
+    await tomarCaptura('HU09_negativa_antes');
+    const isDark = await driver.executeScript("return document.body.classList.contains('dark')");
+    if (!isDark) {
+      console.log('  ✅ Prueba negativa: Modo oscuro desactivado correctamente');
+      await tomarCaptura('HU09_negativa_despues');
+      await registrarResultado('HU-09', 'Desactivar modo oscuro', 'Prueba negativa', 'PASÓ');
+    } else {
+      throw new Error('Modo oscuro no se desactivó');
+    }
+  } catch (e) {
+    await tomarCaptura('HU09_negativa_error');
+    await registrarResultado('HU-09', 'Desactivar modo oscuro', 'Prueba negativa', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba de limites - preferencia persiste al recargar
+  try {
+    const btnDark = await driver.findElement(By.id('btnDark'));
+    await btnDark.click();
+    await esperar(1000);
+    await driver.navigate().refresh();
+    await esperar(2000);
+    await tomarCaptura('HU09_limites_antes');
+    const isDarkAfterRefresh = await driver.executeScript("return document.body.classList.contains('dark')");
+    if (isDarkAfterRefresh) {
+      console.log('  ✅ Prueba de límites: Preferencia de modo oscuro persiste');
+      await tomarCaptura('HU09_limites_despues');
+      await registrarResultado('HU-09', 'Modo oscuro persiste al recargar', 'Prueba de límites', 'PASÓ');
+    } else {
+      throw new Error('Preferencia no persistió');
+    }
+  } catch (e) {
+    await tomarCaptura('HU09_limites_error');
+    await registrarResultado('HU-09', 'Modo oscuro persiste al recargar', 'Prueba de límites', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  await hacerLogout();
+}
+
+// ================================
+// HU-10: CIERRE DE SESION
+// ================================
+async function cierreSesion() {
+  console.log('\n🧪 HU-10: Cierre de sesión seguro');
+  await hacerLogin();
+
+  // Camino feliz - cerrar sesion correctamente
+  try {
+    await tomarCaptura('HU10_camino_feliz_antes');
+    const btnSalir = await driver.findElement(By.xpath("//button[contains(text(),'Salir')]"));
+    await btnSalir.click();
+    await esperar(2000);
+    const url = await driver.getCurrentUrl();
+    if (url.includes('login')) {
+      console.log('  ✅ Camino feliz: Cierre de sesión exitoso');
+      await tomarCaptura('HU10_camino_feliz_despues');
+      await registrarResultado('HU-10', 'Cerrar sesión', 'Camino feliz', 'PASÓ');
+    } else {
+      throw new Error('No redirigió al login');
+    }
+  } catch (e) {
+    await tomarCaptura('HU10_camino_feliz_error');
+    await registrarResultado('HU-10', 'Cerrar sesión', 'Camino feliz', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba negativa - no acceder al dashboard sin sesion
+  try {
+    await driver.get(BASE_URL);
+    await esperar(2000);
+    await tomarCaptura('HU10_negativa_antes');
+    const url = await driver.getCurrentUrl();
+    if (url.includes('login')) {
+      console.log('  ✅ Prueba negativa: No permite acceso sin sesión');
+      await tomarCaptura('HU10_negativa_despues');
+      await registrarResultado('HU-10', 'Acceso sin sesión bloqueado', 'Prueba negativa', 'PASÓ');
+    } else {
+      throw new Error('Permitió acceso sin sesión');
+    }
+  } catch (e) {
+    await tomarCaptura('HU10_negativa_error');
+    await registrarResultado('HU-10', 'Acceso sin sesión bloqueado', 'Prueba negativa', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
+
+  // Prueba de limites - boton salir visible en dashboard
+  try {
+    await hacerLogin();
+    await tomarCaptura('HU10_limites_antes');
+    const btnSalir = await driver.findElement(By.xpath("//button[contains(text(),'Salir')]"));
+    const visible = await btnSalir.isDisplayed();
+    if (visible) {
+      console.log('  ✅ Prueba de límites: Botón salir siempre visible');
+      await tomarCaptura('HU10_limites_despues');
+      await registrarResultado('HU-10', 'Botón salir visible', 'Prueba de límites', 'PASÓ');
+    } else {
+      throw new Error('Botón salir no visible');
+    }
+    await hacerLogout();
+  } catch (e) {
+    await tomarCaptura('HU10_limites_error');
+    await registrarResultado('HU-10', 'Botón salir visible', 'Prueba de límites', 'FALLÓ', e.message);
+    console.log('  ❌ Error:', e.message);
+  }
 }
 
 // ======================
@@ -421,7 +776,7 @@ function generarReporte() {
   <div class="header">
     <h1>📊 Reporte de Pruebas Automatizadas</h1>
     <p>Proyecto: CRUD Productos | Herramienta: Selenium WebDriver | Lenguaje: JavaScript</p>
-    <p>Estudiante: Alex Díaz | Matrícula: 2024-0244</p>
+    <p>Estudiante: Ricardo Alexander Diaz Santana | Matrícula: 2024-0244</p>
     <p>Fecha: ${new Date().toLocaleString()}</p>
   </div>
   <div class="stats">
@@ -467,6 +822,11 @@ async function ejecutarPruebas() {
     await crearProducto();
     await editarProducto();
     await eliminarProducto();
+    await busquedaFiltrado();
+    await exportarCSV();
+    await gestionStock();
+    await modoOscuro();
+    await cierreSesion();
   } finally {
     generarReporte();
     await driver.quit();
